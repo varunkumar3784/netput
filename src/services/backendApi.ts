@@ -24,6 +24,18 @@ export async function fetchCategory(genre: string) {
   return data.movies || [];
 }
 
+export async function fetchSeries() {
+  const res = await fetch(`${BASE}/api/series`);
+  const data = await res.json();
+  return data.series || [];
+}
+
+export async function fetchSeriesCategory(genre: string) {
+  const res = await fetch(`${BASE}/api/series/category/${genre}`);
+  const data = await res.json();
+  return data.series || [];
+}
+
 export async function searchMovies(query: string) {
   if (!query.trim()) return [];
   const res = await fetch(`${BASE}/api/movies/search?q=${encodeURIComponent(query)}`);

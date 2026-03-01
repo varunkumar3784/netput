@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Layout/Header';
 import { BottomNav } from '../components/Layout/BottomNav';
 import { HeroSection } from '../components/Movies/HeroSection';
@@ -43,7 +44,7 @@ async function safeBackend<T>(fn: () => Promise<T>, fallback: () => Promise<T>):
 
 export function Dashboard() {
   const { myList } = useMyList();
-  const [activeTab, setActiveTab] = useState<'tv' | 'movies' | 'categories'>('movies');
+  const [activeTab, setActiveTab] = useState<'tv' | 'movies' | 'categories' | 'mylist'>('movies');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -60,9 +61,13 @@ export function Dashboard() {
   const [detailLoading, setDetailLoading] = useState(false);
   const categoriesRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
 
-  const handleTabChange = (tab: 'tv' | 'movies' | 'categories') => {
+  const handleTabChange = (tab: 'tv' | 'movies' | 'categories' | 'mylist') => {
     setActiveTab(tab);
+    if (tab === 'tv') navigate('/series');
+    if (tab === 'movies') navigate('/movies');
+    if (tab === 'mylist') navigate('/mylist');
     if (tab === 'categories') {
       setTimeout(() => categoriesRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     }

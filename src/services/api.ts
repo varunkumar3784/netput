@@ -54,3 +54,25 @@ export const searchByGenre = async (genre: string, page = 1) => {
   });
   return data;
 };
+
+export const searchSeries = async (query: string, page = 1) => {
+  const { data } = await api.get('/', {
+    params: {
+      s: query,
+      type: 'series',
+      page,
+    },
+  });
+  return data;
+};
+
+export const searchSeriesByGenre = async (genre: string, page = 1) => {
+  const { data } = await api.get('/', {
+    params: {
+      s: genre,
+      type: 'series',
+      page,
+    },
+  });
+  return data;
+};

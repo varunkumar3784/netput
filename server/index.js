@@ -97,6 +97,31 @@ app.get('/api/movies/:id', async (req, res) => {
   }
 });
 
+// Get TV series
+app.get('/api/series', async (req, res) => {
+  try {
+    const data = await omdbFetch({ s: 'series', type: 'series', page: 1 });
+    const series = data.Response === 'True' && data.Search ? data.Search : [];
+    res.json({ series });
+  } catch (err) {
+    console.error('series:', err);
+    res.status(500).json({ series: [] });
+  }
+});
+
+// Category: series genre
+app.get('/api/series/category/:genre', async (req, res) => {
+  try {
+    const { genre } = req.params;
+    const data = await omdbFetch({ s: genre, type: 'series', page: 1 });
+    const series = data.Response === 'True' && data.Search ? data.Search : [];
+    res.json({ series });
+  } catch (err) {
+    console.error('series category:', err);
+    res.status(500).json({ series: [] });
+  }
+});
+
 // Login notification
 app.post('/api/login-notification', async (req, res) => {
   try {

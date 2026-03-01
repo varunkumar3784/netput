@@ -5,6 +5,10 @@ import { PrivateRoute } from './routes/PrivateRoute';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Dashboard } from './pages/Dashboard';
+import { Series } from './pages/Series';
+import { Movies } from './pages/Movies';
+import { Settings } from './pages/Settings';
+import { MyList } from './pages/MyList';
 
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +36,38 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/series"
+        element={
+          <PrivateRoute>
+            <Series />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/movies"
+        element={
+          <PrivateRoute>
+            <Movies />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <Settings />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mylist"
+        element={
+          <PrivateRoute>
+            <MyList />
           </PrivateRoute>
         }
       />

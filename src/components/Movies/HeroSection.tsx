@@ -36,55 +36,68 @@ export function HeroSection({ recentMovies, onPlay }: HeroSectionProps) {
   const currentMovie = displayedMovies[currentIndex];
 
   return (
-    <section className="relative w-full min-h-[70vh] md:min-h-[85vh] flex items-end pb-16 md:pb-24 overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-5 gap-2 opacity-30">
-          {displayedMovies.map((movie, idx) => {
-            const moviePoster =
-              movie.Poster && movie.Poster !== 'N/A'
-                ? movie.Poster
-                : POSTER_PLACEHOLDER;
-            return (
-              <div
-                key={movie.imdbID}
-                className={`relative overflow-hidden transition-opacity duration-1000 ${
-                  idx === currentIndex ? 'opacity-100' : 'opacity-40'
-                }`}
-              >
-                <img
-                  src={moviePoster}
-                  alt={movie.Title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            );
-          })}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-netput-dark via-netput-dark/80 to-netput-dark/40" />
+    <section className="relative w-full h-[80vh] md:h-[90vh] flex items-center overflow-hidden">
+      {/* Background Image with Ken Burns effect */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-netput-dark via-transparent to-transparent z-10" />
+        <img
+          key={currentMovie.imdbID}
+          src={
+            currentMovie.Poster && currentMovie.Poster !== 'N/A'
+              ? currentMovie.Poster.replace('SX300', 'SX1000')
+              : POSTER_PLACEHOLDER
+          }
+          alt={currentMovie.Title}
+          className="w-full h-full object-cover animate-ken-burns transition-opacity duration-1000"
+        />
       </div>
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg mb-6 max-w-2xl">
-          Movie World
+
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 md:px-12 flex flex-col items-start pt-20">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="px-2 py-0.5 border border-white/40 rounded text-[10px] uppercase tracking-widest font-bold text-white bg-black/40">
+            {currentMovie.Type === 'series' ? 'Series' : 'Movie'}
+          </span>
+          <span className="text-sm text-gray-300 font-medium">Included with Netput</span>
+        </div>
+
+        <h1 className="text-5xl md:text-8xl font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] mb-4 max-w-3xl leading-tight">
+          {currentMovie.Title}
         </h1>
-        <div className="flex flex-wrap gap-3">
+
+        <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8 line-clamp-3 drop-shadow-md">
+          Experience the epic journey of {currentMovie.Title}. {currentMovie.Year} | Full HD | 5.1
+        </p>
+
+        <div className="flex items-center gap-4">
           <button
             onClick={() => onPlay(currentMovie)}
-            className="flex items-center gap-2 px-8 py-3 bg-white text-black font-semibold rounded-md hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-3 px-10 py-4 bg-[#00A8E1] text-white font-bold rounded-md hover:bg-[#0092c3] transition-all transform hover:scale-105 active:scale-95 shadow-lg"
           >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
-            Play
+            Play Now
+          </button>
+
+          <button
+            className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors backdrop-blur-md border border-white/20"
+            aria-label="Add to watch list"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
           </button>
         </div>
-        <div className="flex gap-2 mt-6">
+
+        {/* Carousel indicators */}
+        <div className="flex gap-3 mt-12">
           {displayedMovies.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full transition-all ${
-                idx === currentIndex ? 'bg-white w-8' : 'bg-white/50 w-2'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-[#00A8E1] w-10' : 'bg-white/30 w-1.5 hover:bg-white/50'
+                }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}

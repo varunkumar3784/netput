@@ -8,8 +8,7 @@ interface BottomNavProps {
 
 export function BottomNav({ active }: BottomNavProps) {
   const linkClass = (id: NavItem) =>
-    `flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-colors ${
-      active === id ? 'text-netput-red' : 'text-gray-500 hover:text-white'
+    `flex flex-col items-center gap-1 py-2 px-4 rounded-lg transition-colors ${active === id ? 'text-netput-red' : 'text-gray-500 hover:text-white'
     }`;
 
   return (
@@ -21,23 +20,23 @@ export function BottomNav({ active }: BottomNavProps) {
           </svg>
           <span className="text-xs font-medium">Home</span>
         </Link>
-        <button type="button" className={linkClass('series')}>
+        <Link to="/series" className={linkClass('series')}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           <span className="text-xs font-medium">Series</span>
-        </button>
-        <Link to="/dashboard" className={linkClass('movies')}>
+        </Link>
+        <Link to="/movies" className={linkClass('movies')}>
           <span className="text-2xl font-bold text-netput-red">N</span>
           <span className="text-xs font-medium">Movies</span>
         </Link>
-        <button type="button" className={linkClass('settings')}>
+        <Link to="/settings" className={linkClass('settings')}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className="text-xs font-medium">Settings</span>
-        </button>
+        </Link>
       </div>
     </nav>
   );

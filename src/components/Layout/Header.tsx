@@ -6,8 +6,8 @@ interface HeaderProps {
   searchQuery?: string;
   onSearchChange?: (value: string) => void;
   onSearchFocus?: () => void;
-  activeTab?: 'tv' | 'movies' | 'categories';
-  onTabChange?: (tab: 'tv' | 'movies' | 'categories') => void;
+  activeTab?: 'tv' | 'movies' | 'categories' | 'mylist';
+  onTabChange?: (tab: 'tv' | 'movies' | 'categories' | 'mylist') => void;
 }
 
 export function Header({
@@ -23,6 +23,7 @@ export function Header({
   const pills = [
     { id: 'tv' as const, label: 'TV Shows' },
     { id: 'movies' as const, label: 'Movies' },
+    { id: 'mylist' as const, label: 'My List' },
     { id: 'categories' as const, label: 'Categories' },
   ];
 
@@ -32,9 +33,9 @@ export function Header({
         <div className="flex items-center gap-4 md:gap-6 flex-1">
           <Link to="/dashboard" className="flex items-center shrink-0">
             <span className="flex items-center gap-1">
-            <span className="text-3xl font-black text-netput-red">N</span>
-            <span className="text-xl font-bold text-white hidden sm:inline">etput</span>
-          </span>
+              <span className="text-3xl font-black text-netput-red">N</span>
+              <span className="text-xl font-bold text-white hidden sm:inline">etput</span>
+            </span>
           </Link>
           {onSearchChange && (
             <div className="flex-1 max-w-xl">
@@ -64,11 +65,10 @@ export function Header({
                 <button
                   key={pill.id}
                   onClick={() => onTabChange(pill.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    activeTab === pill.id
-                      ? 'bg-white/20 text-white'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === pill.id
+                    ? 'bg-white/20 text-white'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   {pill.label}
                 </button>
