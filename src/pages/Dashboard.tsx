@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '../components/Layout/Header';
 import { BottomNav } from '../components/Layout/BottomNav';
 import { HeroSection } from '../components/Movies/HeroSection';
@@ -47,10 +47,8 @@ export function Dashboard() {
   const [recsLoading, setRecsLoading] = useState(true);
   const [genreMovies, setGenreMovies] = useState<Record<string, { movies: Movie[]; loading: boolean }>>({});
   const [recentMovies, setRecentMovies] = useState<Movie[]>([]);
-  const [recentLoading, setRecentLoading] = useState(true);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const categoriesRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
 
   const loadTop10 = useCallback(async () => {
@@ -80,7 +78,6 @@ export function Dashboard() {
   }, []);
 
   const loadRecent = useCallback(async () => {
-    setRecentLoading(true);
     const movies = await safeBackend(
       () => fetchRecent(),
       async () => {
@@ -89,7 +86,6 @@ export function Dashboard() {
       }
     );
     setRecentMovies(movies);
-    setRecentLoading(false);
   }, [currentYear]);
 
   const loadGenre = useCallback(async (genre: string) => {
