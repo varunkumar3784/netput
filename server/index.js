@@ -128,6 +128,24 @@ app.post('/api/login-notification', async (req, res) => {
   }
 });
 
+// Popular movie IDs for random selection
+const POPULAR_IDS = [
+  'tt1375666', 'tt0468569', 'tt0137523', 'tt0111161', 'tt0109830',
+  'tt0133093', 'tt0068646', 'tt0076759', 'tt0816692', 'tt1345836'
+];
+
+// Get random movie
+app.get('/api/movies/random', async (req, res) => {
+  try {
+    const randomId = POPULAR_IDS[Math.floor(Math.random() * POPULAR_IDS.length)];
+    const data = await omdbFetch({ i: randomId, plot: 'short' });
+    res.json(data);
+  } catch (err) {
+    console.error('random:', err);
+    res.status(500).json({});
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Netput API running on port ${PORT}`);
