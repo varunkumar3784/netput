@@ -3,19 +3,13 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 interface HeaderProps {
-  searchQuery?: string;
-  onSearchChange?: (value: string) => void;
-  onSearchFocus?: () => void;
   activeTab?: 'tv' | 'movies' | 'categories' | 'mylist';
-  onTabChange?: (tab: 'tv' | 'movies' | 'categories' | 'mylist') => void;
+  onSearchTrigger?: () => void;
 }
 
 export function Header({
-  searchQuery = '',
-  onSearchChange,
-  onSearchFocus,
   activeTab = 'movies',
-  onTabChange,
+  onSearchTrigger,
 }: HeaderProps) {
   const { user, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
@@ -28,50 +22,52 @@ export function Header({
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-black/80 to-transparent">
-      <div className="flex items-center justify-between px-4 md:px-8 h-16">
-        <div className="flex items-center gap-4 md:gap-6 flex-1">
-          <Link to="/dashboard" className="flex items-center shrink-0">
-            <span className="flex items-center gap-1">
-              <span className="text-3xl font-black text-netput-red">N</span>
-              <span className="text-xl font-bold text-white hidden sm:inline">etput</span>
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-black/90 via-black/40 to-transparent backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 md:px-12 h-20">
+        <div className="flex items-center gap-6 md:gap-10 flex-1">
+          <Link to="/dashboard" className="flex items-center shrink-0 group transition-all transform hover:scale-110">
+            <span className="flex items-center gap-1.5">
+              <span className="text-4xl font-black text-netput-red drop-shadow-red transition-all group-hover:drop-shadow-glow">N</span>
+              <span className="text-2xl font-black text-white hidden sm:inline tracking-tighter">etput</span>
             </span>
           </Link>
-          {onSearchChange && (
-            <div className="flex-1 max-w-xl">
-              <div className="relative">
-                <input
-                  type="search"
-                  placeholder="Search movies, TV shows..."
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  onFocus={onSearchFocus}
-                  className="w-full px-4 py-2 pl-10 bg-[#333] text-white rounded-lg placeholder-gray-500 text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-netput-red"
-                />
+
+          <div className="flex-1 max-w-lg hidden md:block">
+            <div
+              onClick={onSearchTrigger}
+              className="relative cursor-pointer group"
+            >
+              <div className="w-full px-5 py-3.5 bg-white/5 text-gray-400 rounded-2xl border border-white/10 group-hover:bg-white/10 group-hover:border-white/20 transition-all flex items-center gap-4">
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
+                  className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                <span className="text-sm font-medium">Search for movies, series...</span>
               </div>
             </div>
-          )}
-          {onTabChange && (
+          </div>
+          {pills.length > 0 && (
             <nav className="flex items-center gap-1">
               {pills.map((pill) => (
-                <button
+                <Link
                   key={pill.id}
-                  onClick={() => onTabChange(pill.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === pill.id
-                    ? 'bg-white/20 text-white'
-                    : 'text-gray-400 hover:text-white'
+                  to={
+                    pill.id === 'tv' ? '/series' :
+                      pill.id === 'movies' ? '/movies' :
+                        pill.id === 'mylist' ? '/mylist' :
+                          '/dashboard'
+                  }
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === pill.id
+                    ? 'bg-white/20 text-white shadow-lg backdrop-blur-md'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
                   {pill.label}
-                </button>
+                </Link>
               ))}
             </nav>
           )}

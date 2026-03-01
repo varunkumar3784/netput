@@ -4,13 +4,16 @@ import { BottomNav } from '../components/Layout/BottomNav';
 import { HeroSection } from '../components/Movies/HeroSection';
 import { GenreRow } from '../components/Movies/GenreRow';
 import { MovieDetailModal } from '../components/Movies/MovieDetailModal';
+import { SearchOverlay } from '../components/Movies/SearchOverlay';
 import {
     fetchSeries,
     fetchSeriesCategory,
+    getMovieById as backendGetMovie
 } from '../services/backendApi';
 import {
     searchSeries,
     searchSeriesByGenre,
+    getMovieById as omdbGetMovie
 } from '../services/api';
 import type { Movie } from '../types';
 import { openTrailer } from '../utils/playTrailer';
@@ -37,6 +40,8 @@ export function Series() {
         Record<string, { movies: Movie[]; loading: boolean }>
     >({});
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
 
     const loadAllSeries = useCallback(async () => {
         setLoading(true);
@@ -68,21 +73,31 @@ export function Series() {
         SERIES_CATEGORIES.forEach((c) => loadGenre(c.key));
     }, [loadAllSeries, loadGenre]);
 
-    const handleMovieClick = (movie: Movie) => setSelectedMovie(movie);
+    const handleMovieClick = async (movie: Movie) => {
+        setDetailLoading(true);
+        setSelectedMovie(movie);
+        try {
+            const data = await safeBackend(
+                () => backendGetMovie(movie.imdbID),
+                () => omdbGetMovie(movie.imdbID)
+            );
+            if (data?.Response === 'True') setSelectedMovie(data as Movie);
+        } catch {
+            setSelectedMovie(movie);
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
     const handlePlay = (movie: Movie) => openTrailer(movie.Title, movie.Year);
 
     return (
-        <div className="min-h-screen bg-[#141414] pb-20">
-            <Header
-                searchQuery=""
-                onSearchChange={() => { }}
-                onSearchFocus={() => { }}
-                activeTab="tv"
-                onTabChange={() => { }}
-            />
-            <main className="pb-8 -mt-16">
-                <HeroSection recentMovies={series} onPlay={handlePlay} />
-                <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-8">
+        <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
+            <Header activeTab="tv" onSearchTrigger={() => setSearchOpen(true)} />
+
+            <main className="pb-8 -mt-20">
+                <HeroSection recentMovies={series.slice(0, 5)} onPlay={handlePlay} />
+                <div className="max-w-7xl mx-auto px-4 md:px-12 -mt-10 relative z-10">
                     <GenreRow
                         title="Popular Series"
                         movies={series}
@@ -102,13 +117,21 @@ export function Series() {
                     ))}
                 </div>
             </main>
+
             {selectedMovie && (
                 <MovieDetailModal
-                    movie={selectedMovie}
+                    movie={detailLoading ? { ...selectedMovie, Plot: 'Loading...' } : selectedMovie}
                     onClose={() => setSelectedMovie(null)}
                     onPlay={() => handlePlay(selectedMovie)}
                 />
             )}
+
+            <SearchOverlay
+                isOpen={searchOpen}
+                onClose={() => setSearchOpen(false)}
+                onMovieClick={handleMovieClick}
+            />
+
             <BottomNav active="series" />
         </div>
     );

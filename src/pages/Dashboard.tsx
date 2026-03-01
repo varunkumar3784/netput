@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Layout/Header';
 import { BottomNav } from '../components/Layout/BottomNav';
 import { HeroSection } from '../components/Movies/HeroSection';
-import { Top10Row } from '../components/Movies/Top10Row';
 import { GenreRow } from '../components/Movies/GenreRow';
 import { MovieDetailModal } from '../components/Movies/MovieDetailModal';
+import { SearchOverlay } from '../components/Movies/SearchOverlay';
 import {
   fetchTop10,
   fetchRecommendations,
   fetchRecent,
   fetchCategory,
-  searchMovies as backendSearch,
   getMovieById as backendGetMovie,
 } from '../services/backendApi';
 import {
@@ -25,13 +23,11 @@ import { openTrailer } from '../utils/playTrailer';
 import { useMyList } from '../context/MyListContext';
 
 const CATEGORY_SECTIONS = [
-  { key: 'anime', label: 'Anime about Friendship' },
+  { key: 'anime', label: 'Anime & Global Animation' },
   { key: 'drama', label: 'Critically Acclaimed TV Dramas' },
-  { key: 'horror', label: 'Horror' },
-  { key: 'comedy', label: 'Comedy' },
-  { key: 'action', label: 'Action' },
-  { key: 'romance', label: 'Romance' },
-  { key: 'sci-fi', label: 'Sci-Fi' },
+  { key: 'horror', label: 'Spooky & Horror' },
+  { key: 'comedy', label: 'Laughter Therapy' },
+  { key: 'action', label: 'High Octane Action' },
 ];
 
 async function safeBackend<T>(fn: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
@@ -44,34 +40,18 @@ async function safeBackend<T>(fn: () => Promise<T>, fallback: () => Promise<T>):
 
 export function Dashboard() {
   const { myList } = useMyList();
-  const [activeTab, setActiveTab] = useState<'tv' | 'movies' | 'categories' | 'mylist'>('movies');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [top10, setTop10] = useState<Movie[]>([]);
   const [top10Loading, setTop10Loading] = useState(true);
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [recsLoading, setRecsLoading] = useState(true);
-  const [genreMovies, setGenreMovies] = useState<
-    Record<string, { movies: Movie[]; loading: boolean }>
-  >({});
+  const [genreMovies, setGenreMovies] = useState<Record<string, { movies: Movie[]; loading: boolean }>>({});
   const [recentMovies, setRecentMovies] = useState<Movie[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const categoriesRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
-  const navigate = useNavigate();
-
-  const handleTabChange = (tab: 'tv' | 'movies' | 'categories' | 'mylist') => {
-    setActiveTab(tab);
-    if (tab === 'tv') navigate('/series');
-    if (tab === 'movies') navigate('/movies');
-    if (tab === 'mylist') navigate('/mylist');
-    if (tab === 'categories') {
-      setTimeout(() => categoriesRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-    }
-  };
 
   const loadTop10 = useCallback(async () => {
     setTop10Loading(true);
@@ -91,7 +71,7 @@ export function Dashboard() {
     const movies = await safeBackend(
       () => fetchRecommendations(),
       async () => {
-        const d = await omdbSearch('action');
+        const d = await omdbSearch('popular');
         return d.Response === 'True' && d.Search ? d.Search : [];
       }
     );
@@ -113,7 +93,7 @@ export function Dashboard() {
   }, [currentYear]);
 
   const loadGenre = useCallback(async (genre: string) => {
-    setGenreMovies((prev) => ({ ...prev, [genre]: { ...prev[genre], loading: true } }));
+    setGenreMovies((prev) => ({ ...prev, [genre]: { movies: [], loading: true } }));
     const movies = await safeBackend(
       () => fetchCategory(genre),
       async () => {
@@ -124,37 +104,12 @@ export function Dashboard() {
     setGenreMovies((prev) => ({ ...prev, [genre]: { movies, loading: false } }));
   }, []);
 
-  const loadSearch = useCallback(async (q: string) => {
-    if (!q.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    const movies = await safeBackend(
-      () => backendSearch(q),
-      async () => {
-        const d = await omdbSearch(q);
-        return d.Response === 'True' && d.Search ? d.Search : [];
-      }
-    );
-    setSearchResults(movies);
-  }, []);
-
   useEffect(() => {
     loadTop10();
-  }, [loadTop10]);
-  useEffect(() => {
     loadRecommendations();
-  }, [loadRecommendations]);
-  useEffect(() => {
     loadRecent();
-  }, [loadRecent]);
-  useEffect(() => {
-    ['anime', 'drama', 'horror', 'comedy', 'action', 'romance', 'sci-fi'].forEach(loadGenre);
-  }, [loadGenre]);
-  useEffect(() => {
-    const t = setTimeout(() => loadSearch(searchQuery), 400);
-    return () => clearTimeout(t);
-  }, [searchQuery, loadSearch]);
+    CATEGORY_SECTIONS.forEach(c => loadGenre(c.key));
+  }, [loadTop10, loadRecommendations, loadRecent, loadGenre]);
 
   const handleMovieClick = async (movie: Movie) => {
     setDetailLoading(true);
@@ -164,9 +119,7 @@ export function Dashboard() {
         () => backendGetMovie(movie.imdbID),
         () => omdbGetMovie(movie.imdbID)
       );
-      if (data?.Response === 'True') {
-        setSelectedMovie(data as Movie);
-      }
+      if (data?.Response === 'True') setSelectedMovie(data as Movie);
     } catch {
       setSelectedMovie(movie);
     } finally {
@@ -176,140 +129,93 @@ export function Dashboard() {
 
   const handlePlay = (movie: Movie) => openTrailer(movie.Title, movie.Year);
 
-  const showSearch = searchOpen || searchQuery.length > 0;
-
   return (
-    <div className="min-h-screen bg-[#141414] pb-20 md:pb-8">
+    <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
       <Header
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onSearchFocus={() => setSearchOpen(true)}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
+        activeTab="movies"
+        onSearchTrigger={() => setSearchOpen(true)}
       />
 
-      {showSearch && (
-        <div className="fixed inset-0 z-40 bg-[#141414] p-4 pt-20">
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <input
-                type="search"
-                placeholder="Search movies, TV shows..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                className="w-full px-4 py-4 pl-12 bg-[#333] text-white rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-netput-red"
-              />
-              <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <button
-                onClick={() => {
-                  setSearchOpen(false);
-                  setSearchQuery('');
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto">
-              {searchQuery.length > 0 &&
-                searchResults.map((m) => (
+      <main className="pb-12 -mt-20">
+        <HeroSection recentMovies={recentMovies.slice(0, 5)} onPlay={handlePlay} />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-12 -mt-10 relative z-10">
+          {/* Top 10 with attractive numbering */}
+          <section className="mb-14 overflow-visible">
+            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-4">
+              <span className="w-1.5 h-8 bg-netput-red rounded-full shadow-glow" />
+              Top 10 Today
+            </h2>
+            <div className="flex gap-6 overflow-x-auto pb-10 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+              {top10Loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="min-w-[200px] aspect-[2/3] bg-white/5 animate-pulse rounded-2xl" />
+                ))
+              ) : (
+                top10.map((movie, index) => (
                   <div
-                    key={m.imdbID}
-                    onClick={() => {
-                      handleMovieClick(m);
-                      setSearchOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className="cursor-pointer group"
+                    key={movie.imdbID}
+                    onClick={() => handleMovieClick(movie)}
+                    className="relative min-w-[180px] md:min-w-[240px] group cursor-pointer"
                   >
-                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-[#333]">
-                      <img
-                        src={
-                          m.Poster && m.Poster !== 'N/A'
-                            ? m.Poster
-                            : 'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Poster'
-                        }
-                        alt={m.Title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    <div className="absolute -left-6 md:-left-8 bottom-[-10px] text-[150px] md:text-[220px] font-black leading-none text-transparent stroke-netput-red/30 group-hover:stroke-netput-red transition-all duration-500 select-none z-0 italic" style={{ WebkitTextStrokeWidth: '2px', WebkitTextStrokeColor: 'rgba(229, 9, 20, 0.4)' }}>
+                      {index + 1}
                     </div>
-                    <p className="mt-2 text-sm text-white font-medium line-clamp-2">{m.Title}</p>
+                    <div className="relative z-10 ml-8 md:ml-16 overflow-hidden rounded-2xl shadow-2xl transition-all duration-500 group-hover:scale-105 border border-white/5 group-hover:border-netput-red/50">
+                      <img
+                        src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Poster'}
+                        alt={movie.Title}
+                        className="w-full aspect-[2/3] object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
+                        <span className="text-xs font-bold text-netput-red uppercase tracking-widest mb-1">Top Rated</span>
+                        <h4 className="text-white text-sm font-black line-clamp-1">{movie.Title}</h4>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
-          </div>
+          </section>
+
+          {myList.length > 0 && (
+            <GenreRow title="My List" movies={myList} onMovieClick={handleMovieClick} onPlay={handlePlay} />
+          )}
+
+          <GenreRow
+            title="Trending & Recommended"
+            movies={recommendations}
+            loading={recsLoading}
+            onMovieClick={handleMovieClick}
+            onPlay={handlePlay}
+          />
+
+          {CATEGORY_SECTIONS.map(({ key, label }) => (
+            <GenreRow
+              key={key}
+              title={label}
+              movies={genreMovies[key]?.movies ?? []}
+              loading={genreMovies[key]?.loading ?? true}
+              onMovieClick={handleMovieClick}
+              onPlay={handlePlay}
+            />
+          ))}
         </div>
-      )}
-
-      {!showSearch && (
-        <main className="pb-8 -mt-16">
-          <HeroSection recentMovies={recentMovies} onPlay={handlePlay} />
-
-          <div ref={categoriesRef} className="max-w-7xl mx-auto px-4 md:px-8 -mt-8">
-            <Top10Row
-              movies={top10}
-              loading={top10Loading}
-              onMovieClick={handleMovieClick}
-              onPlay={handlePlay}
-            />
-            <GenreRow
-              title="We Think You'll Love These"
-              movies={recommendations}
-              loading={recsLoading}
-              onMovieClick={handleMovieClick}
-              onPlay={handlePlay}
-              showRecentlyAdded
-            />
-            {myList.length > 0 && (
-              <GenreRow
-                title="My List"
-                movies={myList}
-                onMovieClick={handleMovieClick}
-                onPlay={handlePlay}
-              />
-            )}
-            <GenreRow
-              title="Recently Released"
-              movies={recentMovies}
-              loading={recentLoading}
-              onMovieClick={handleMovieClick}
-              onPlay={handlePlay}
-              showRecentlyAdded
-            />
-            {CATEGORY_SECTIONS.map(({ key, label }) => (
-              <GenreRow
-                key={key}
-                title={label}
-                movies={genreMovies[key]?.movies ?? []}
-                loading={genreMovies[key]?.loading ?? true}
-                onMovieClick={handleMovieClick}
-                onPlay={handlePlay}
-                showRecentlyAdded
-              />
-            ))}
-          </div>
-        </main>
-      )}
+      </main>
 
       {selectedMovie && (
         <MovieDetailModal
-          movie={
-            detailLoading ? { ...selectedMovie, Plot: 'Loading...' } : selectedMovie
-          }
+          movie={detailLoading ? { ...selectedMovie, Plot: 'Loading cinematic details...' } : selectedMovie}
           onClose={() => setSelectedMovie(null)}
           onPlay={() => handlePlay(selectedMovie)}
         />
       )}
+
+      <SearchOverlay
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onMovieClick={handleMovieClick}
+      />
 
       <BottomNav active="home" />
     </div>
