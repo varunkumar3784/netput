@@ -72,6 +72,24 @@ export function Header({
               <Link
                 key={pill.id}
                 to={pill.to}
+                onClick={(e) => {
+                  if (pill.to.includes('#')) {
+                    const [path, hash] = pill.to.split('#');
+                    if (path === window.location.pathname || (path === '/dashboard' && window.location.pathname === '/')) {
+                      e.preventDefault();
+                      const element = document.getElementById(hash);
+                      if (element) {
+                        const offset = 100; // Account for sticky header
+                        const elementPosition = element.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - offset;
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }
+                  }
+                }}
                 className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap ${activeTab === pill.id
                   ? 'bg-netput-red text-white shadow-glow'
                   : 'text-gray-400 hover:text-white hover:bg-white/10'

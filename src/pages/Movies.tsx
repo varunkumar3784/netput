@@ -42,6 +42,7 @@ export function Movies() {
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
+    const [activeGenre, setActiveGenre] = useState('movies');
 
     const loadAllMovies = useCallback(async () => {
         setLoading(true);
@@ -73,6 +74,34 @@ export function Movies() {
         MOVIE_CATEGORIES.forEach((c) => loadGenre(c.key));
     }, [loadAllMovies, loadGenre]);
 
+    // Handle initial hash scroll and hash changes
+    useEffect(() => {
+        const handleHash = () => {
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1);
+                setActiveGenre(hash);
+                const element = document.getElementById(hash);
+                if (element) {
+                    const offset = 100;
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            } else {
+                setActiveGenre('movies');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        window.addEventListener('hashchange', handleHash);
+        if (window.location.hash) handleHash();
+
+        return () => window.removeEventListener('hashchange', handleHash);
+    }, []);
+
     const handleMovieClick = async (movie: Movie) => {
         setDetailLoading(true);
         setSelectedMovie(movie);
@@ -94,11 +123,15 @@ export function Movies() {
     return (
         <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
             <Header
-                activeTab="movies"
+                activeTab={activeGenre}
                 onSearchTrigger={() => setSearchOpen(true)}
                 customPills={[
                     { id: 'movies', label: 'All Movies', to: '/movies' },
-                    ...MOVIE_CATEGORIES.map(c => ({ id: c.key, label: c.label.replace(' Movies', ''), to: `/movies#${c.key}` }))
+                    ...MOVIE_CATEGORIES.map(c => ({
+                        id: c.key,
+                        label: c.label.replace(' Movies', ''),
+                        to: `/movies#${c.key}`
+                    }))
                 ]}
             />
 
@@ -115,6 +148,7 @@ export function Movies() {
                     {MOVIE_CATEGORIES.map(({ key, label }) => (
                         <GenreRow
                             key={key}
+                            id={key}
                             title={label}
                             movies={genreMovies[key]?.movies ?? []}
                             loading={genreMovies[key]?.loading ?? true}
