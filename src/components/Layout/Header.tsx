@@ -3,23 +3,27 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 interface HeaderProps {
-  activeTab?: 'tv' | 'movies' | 'categories' | 'mylist';
+  activeTab?: 'home' | 'tv' | 'movies' | 'categories' | 'mylist' | string;
   onSearchTrigger?: () => void;
+  customPills?: { id: string; label: string; to: string }[];
 }
 
 export function Header({
-  activeTab = 'movies',
+  activeTab = 'home',
   onSearchTrigger,
+  customPills
 }: HeaderProps) {
   const { user, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
 
-  const pills = [
-    { id: 'tv' as const, label: 'TV Shows' },
-    { id: 'movies' as const, label: 'Movies' },
-    { id: 'mylist' as const, label: 'My List' },
-    { id: 'categories' as const, label: 'Categories' },
+  const defaultPills = [
+    { id: 'home', label: 'All', to: '/dashboard' },
+    { id: 'tv', label: 'TV Shows', to: '/series' },
+    { id: 'movies', label: 'Movies', to: '/movies' },
+    { id: 'mylist', label: 'My List', to: '/mylist' },
   ];
+
+  const pills = customPills || defaultPills;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-black/90 via-black/40 to-transparent backdrop-blur-sm">
@@ -67,12 +71,7 @@ export function Header({
             {pills.map((pill) => (
               <Link
                 key={pill.id}
-                to={
-                  pill.id === 'tv' ? '/series' :
-                    pill.id === 'movies' ? '/movies' :
-                      pill.id === 'mylist' ? '/mylist' :
-                        '/dashboard'
-                }
+                to={pill.to}
                 className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap ${activeTab === pill.id
                   ? 'bg-netput-red text-white shadow-glow'
                   : 'text-gray-400 hover:text-white hover:bg-white/10'

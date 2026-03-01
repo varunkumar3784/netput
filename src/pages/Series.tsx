@@ -93,7 +93,14 @@ export function Series() {
 
     return (
         <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
-            <Header activeTab="tv" onSearchTrigger={() => setSearchOpen(true)} />
+            <Header
+                activeTab="tv"
+                onSearchTrigger={() => setSearchOpen(true)}
+                customPills={[
+                    { id: 'tv', label: 'All Series', to: '/series' },
+                    ...SERIES_CATEGORIES.map(c => ({ id: c.key, label: c.label.replace(' series', '').replace(' Series', ''), to: `/series#${c.key}` }))
+                ]}
+            />
 
             <main className="pb-8 -mt-20">
                 <HeroSection recentMovies={series.slice(0, 5)} onPlay={handlePlay} />
@@ -108,6 +115,7 @@ export function Series() {
                     {SERIES_CATEGORIES.map(({ key, label }) => (
                         <GenreRow
                             key={key}
+                            id={key}
                             title={label}
                             movies={genreSeries[key]?.movies ?? []}
                             loading={genreSeries[key]?.loading ?? true}

@@ -128,7 +128,7 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
       <Header
-        activeTab="movies"
+        activeTab="home"
         onSearchTrigger={() => setSearchOpen(true)}
       />
 

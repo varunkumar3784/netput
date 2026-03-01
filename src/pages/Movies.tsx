@@ -93,7 +93,14 @@ export function Movies() {
 
     return (
         <div className="min-h-screen bg-[#141414] pb-20 overflow-x-hidden">
-            <Header activeTab="movies" onSearchTrigger={() => setSearchOpen(true)} />
+            <Header
+                activeTab="movies"
+                onSearchTrigger={() => setSearchOpen(true)}
+                customPills={[
+                    { id: 'movies', label: 'All Movies', to: '/movies' },
+                    ...MOVIE_CATEGORIES.map(c => ({ id: c.key, label: c.label.replace(' Movies', ''), to: `/movies#${c.key}` }))
+                ]}
+            />
 
             <main className="pb-8 -mt-20">
                 <HeroSection recentMovies={movies.slice(0, 5)} onPlay={handlePlay} />
