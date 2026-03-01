@@ -10,6 +10,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Attractive Root Page
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Netput API | Production</title>
+        <style>
+          body { background: #000; color: #E50914; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .container { text-align: center; padding: 40px; border: 2px solid #E50914; border-radius: 20px; box-shadow: 0 0 30px rgba(229, 9, 20, 0.4); }
+          h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -2px; }
+          p { color: #888; margin-top: 10px; font-size: 1.1rem; }
+          .status { display: inline-block; margin-top: 20px; padding: 5px 15px; background: #E50914; color: white; border-radius: 5px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>NETPUT API</h1>
+          <p>The core engine of your streaming experience</p>
+          <div class="status">SYSTEM ONLINE</div>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 const OMDB_API = 'https://www.omdbapi.com';
 const API_KEY = process.env.VITE_OMDB_API_KEY || 'ce875263';
 
@@ -173,5 +198,10 @@ app.get('/api/movies/random', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Netput API running on port ${PORT}`);
+  console.log('\x1b[31m%s\x1b[0m', '  _  _  ___ _____ ___ _   _ _____ ');
+  console.log('\x1b[31m%s\x1b[0m', ' | \\| || __|_   _| _ \\ | | |_   _|');
+  console.log('\x1b[31m%s\x1b[0m', ' | .  || _|  | | |  _/ |_| | | |  ');
+  console.log('\x1b[31m%s\x1b[0m', ' |_|\\_||___| |_| |_|  \\___/  |_|  ');
+  console.log('\x1b[32m%s\x1b[0m', `\n [✔] Netput Backend Engine LIVE | Port ${PORT}`);
+  console.log('\x1b[36m%s\x1b[0m', ` [➜] Interactive Mode: ON\n`);
 });

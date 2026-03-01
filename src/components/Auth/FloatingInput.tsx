@@ -41,12 +41,13 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
           onBlur={handleBlur}
           onChange={handleChange}
           className={`
-            peer w-full px-4 pt-6 pb-2 bg-[#333] rounded
+            peer w-full px-5 pt-8 pb-3 bg-[#2b2b2b] rounded-xl
             text-white placeholder-transparent
-            border border-transparent
-            focus:outline-none focus:ring-2 focus:ring-white/50
-            transition-all duration-200
-            ${error ? 'border-red-500' : ''}
+            border-2 border-transparent
+            focus:outline-none focus:border-white/20 focus:bg-[#333]
+            transition-all duration-300 ease-out
+            shadow-inner
+            ${error ? 'border-red-500/50' : ''}
             ${className}
           `}
           placeholder={label}
@@ -54,8 +55,11 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
         />
         <label
           className={`
-            absolute left-4 transition-all duration-200 pointer-events-none
-            ${isFloating ? 'top-2 text-xs text-gray-400' : 'top-1/2 -translate-y-1/2 text-base text-gray-500'}
+            absolute left-5 transition-all duration-300 pointer-events-none font-medium
+            ${isFloating
+              ? 'top-2 text-[10px] text-gray-400 opacity-0 -translate-y-2'
+              : 'top-1/2 -translate-y-1/2 text-base text-gray-500 opacity-100'
+            }
           `}
         >
           {label}
