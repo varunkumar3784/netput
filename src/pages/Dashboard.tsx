@@ -135,7 +135,7 @@ export function Dashboard() {
       <main className="pb-12 -mt-20">
         <HeroSection recentMovies={recentMovies.slice(0, 5)} onPlay={handlePlay} />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-12 -mt-10 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-12 mt-10 relative z-10">
           {/* Top 10 with attractive numbering */}
           <section className="mb-14 overflow-visible">
             <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-4">

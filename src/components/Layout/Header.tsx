@@ -32,10 +32,11 @@ export function Header({
             </span>
           </Link>
 
-          <div className="flex-1 max-w-lg hidden md:block">
+          <div className="flex-1 max-w-lg">
+            {/* Desktop Search */}
             <div
               onClick={onSearchTrigger}
-              className="relative cursor-pointer group"
+              className="hidden md:block relative cursor-pointer group"
             >
               <div className="w-full px-5 py-3.5 bg-white/5 text-gray-400 rounded-2xl border border-white/10 group-hover:bg-white/10 group-hover:border-white/20 transition-all flex items-center gap-4">
                 <svg
@@ -49,28 +50,38 @@ export function Header({
                 <span className="text-sm font-medium">Search for movies, series...</span>
               </div>
             </div>
+
+            {/* Mobile Search Button */}
+            <button
+              onClick={onSearchTrigger}
+              className="md:hidden p-2.5 bg-white/5 rounded-full border border-white/10 text-gray-400 hover:text-white transition-all shadow-lg backdrop-blur-md"
+              aria-label="Search"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
           </div>
-          {pills.length > 0 && (
-            <nav className="flex items-center gap-1">
-              {pills.map((pill) => (
-                <Link
-                  key={pill.id}
-                  to={
-                    pill.id === 'tv' ? '/series' :
-                      pill.id === 'movies' ? '/movies' :
-                        pill.id === 'mylist' ? '/mylist' :
-                          '/dashboard'
-                  }
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === pill.id
-                    ? 'bg-white/20 text-white shadow-lg backdrop-blur-md'
-                    : 'text-gray-400 hover:text-white hover:bg-white/10'
-                    }`}
-                >
-                  {pill.label}
-                </Link>
-              ))}
-            </nav>
-          )}
+
+          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide ml-2">
+            {pills.map((pill) => (
+              <Link
+                key={pill.id}
+                to={
+                  pill.id === 'tv' ? '/series' :
+                    pill.id === 'movies' ? '/movies' :
+                      pill.id === 'mylist' ? '/mylist' :
+                        '/dashboard'
+                }
+                className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap ${activeTab === pill.id
+                  ? 'bg-netput-red text-white shadow-glow'
+                  : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                {pill.label}
+              </Link>
+            ))}
+          </nav>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="relative">
